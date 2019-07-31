@@ -1,2 +1,3 @@
 # tensorflow-experiences
-My experiences with TensorFlow
+Minhas experiências com TensorFlow
+- [x] Fazendo previsões com dados 2D
