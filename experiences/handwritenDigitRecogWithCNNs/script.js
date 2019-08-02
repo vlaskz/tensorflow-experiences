@@ -26,12 +26,23 @@ async function showExamples(data) {
 }
 
 async function run() {
+    console.log('started running')
+    console.log('creating data')
     const data = new MnistData()
+    console.log('loading data')
     await data.load();
+    console.log('showing examples')
     await showExamples(data)
+    console.log('getting model')
     const model = getModel()
+    console.log('showing summary')
     tfvis.show.modelSummary({ name: 'Model Architecture' }, model)
+    console.log('training model')
     await train(model, data)
+    console.log('showing accuracy')
+    await showAccuracy(model, data)
+    console.log('showing confusion')
+    await showConfusion(model, data)
 }
 
 function getModel() {
@@ -59,7 +70,7 @@ function getModel() {
         activation: 'relu',
         kernelInitializer: 'varianceScaling'
     }))
-    
+
     model.add(tf.layers.maxPooling2d({ poolSize: [2, 2], strides: [2, 2] }))
 
     model.add(tf.layers.flatten())
@@ -121,6 +132,36 @@ async function train(model, data) {
     })
 }
 
+const classNames = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine']
 
+function doPrediction(model, data, testDataSize = 500) {
+    const IMAGE_WIDTH = 28
+    const IMAGE_HEIGHT = 28
+    const testData = data.nextTestBatch(testDataSize)
+    const testxs = testData.xs.reshape([testDataSize, IMAGE_WIDTH, IMAGE_HEIGHT, 1])
+    const labels = testData.labels.argMax([-1])
+    const preds = model.predict(testxs).argMax([-1])
+
+    testxs.dispose()
+    return [preds, labels]
+}
+
+async function showAccuracy(model, data) {
+    const [preds, labels] = doPrediction(model, data)
+    const classAccuracy = await tfvis.metrics.perClassAccuracy(labels, preds)
+    const container = { name: 'Accuracy', tab: 'Evaluation' }
+    tfvis.show.perClassAccuracy(container, classAccuracy, classNames)
+
+    labels.dispose()
+}
+
+async function showConfusion(model, data) {
+    const [preds, labels] = doPrediction(model, data)
+    const confusionMatrix = await tfvis.metrics.confusionMatrix(labels, preds)
+    const container = { name: 'Confusion Matrix', tab: 'Evaluation' }
+    tfvis.render.confusionMatrix(
+        container, { values: confusionMatrix }, classNames)
+    labels.dispose()
+}
 
 document.addEventListener('DOMContentLoaded', run)
