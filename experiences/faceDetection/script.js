@@ -1,3 +1,12 @@
+/*
+
+USING FACE-API.JS, A TENSORFLOW FACE RECOGNITION ADD-ON OR API OR WRAPPER.
+NOTHING MORE TONIGHT.
+IF ANYONE SEE THIS, JUST GO REST A LITTLE... NOBODY IS MADE OF IRON, EVEN TONY STARK
+
+*/
+
+
 const video = document.getElementById('video')
 const constraints = { audio: false, video: { width: 720, height: 560 } }
 
